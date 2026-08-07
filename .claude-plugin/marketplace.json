@@ -1,0 +1,13 @@
+{
+  "name": "my-claude-tools",
+  "owner": {
+    "name": "Gibson Nevill"
+  },
+  "plugins": [
+    {
+      "name": "personal-skills",
+      "source": "./plugins/personal-skills",
+      "description": "My reusable Claude Code skills"
+    }
+  ]
+}
