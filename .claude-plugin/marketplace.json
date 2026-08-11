@@ -5,9 +5,9 @@
   },
   "plugins": [
     {
-      "name": "personal-skills",
-      "source": "./plugins/personal-skills",
-      "description": "My reusable Claude Code skills"
+      "name": "personal-tools",
+      "source": "./plugins/personal-tools",
+      "description": "My reusable Claude Code tools"
     }
   ]
 }

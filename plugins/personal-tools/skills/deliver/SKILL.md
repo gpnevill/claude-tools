@@ -66,6 +66,8 @@ Each round `N`:
 
 ## Phase 4 — Test loop
 
+Ask via `AskUserQuestion` whether to run the test loop. Options: **Yes** and **No**. **No** → Phase 5.
+
 Each round:
 
 1. Launch a fresh `work-tester` with **only**: the ticket key (or, for no-ticket work, the `request.md` path), the worktree path, and a `test-NN.md` output path. Nothing else — no plans, no reports, no history. The tester's isolation is the point.
