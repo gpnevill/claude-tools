@@ -1,6 +1,6 @@
 ---
 name: plan-work
-description: Interrogate the user exhaustively about a Jira ticket or a described piece of work until every implementation decision is made, then write a self-contained, approved plan file. Also resolves gap reports against an existing plan. Use when the user says "plan MP-1234", "interrogate me about this ticket", "plan this work", or invokes /plan-work.
+description: Interrogate the user exhaustively about a Jira ticket or a described piece of work until every implementation decision is made, then write a self-contained, approved plan file. Also resolves gap reports against an existing plan. Use when the user says "plan M2X-1234", "interrogate me about this ticket", "plan this work", or invokes /plan-work.
 argument-hint: '<ticket-key and/or work description> [--work-dir <dir>] [--gap <gap-report-path>]'
 ---
 

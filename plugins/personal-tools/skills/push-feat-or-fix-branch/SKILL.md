@@ -39,7 +39,7 @@ Reuse an existing open PR if present: `bb_get` `/repositories/<ws>/<repo>/pullre
 }
 ```
 
-Title humanization: capitalize the first letter, hyphens to spaces, ticket tokens (`[A-Z]+-\d+`) kept intact: `feat/MP-23049-interpolate-properly` → `Feat/MP-23049 interpolate properly`.
+Title humanization: capitalize the first letter, hyphens to spaces, ticket tokens (`[A-Z]+-\d+`) kept intact: `feat/M2X-23049-interpolate-properly` → `Feat/M2X-23049 interpolate properly`.
 
 **Reviewer scrub (mandatory)**: immediately `bb_get` the PR (`jq: "{id: id, reviewers: reviewers}"`). Bitbucket's CODEOWNERS integration may auto-populate reviewers even when the create call passed an empty list. If reviewers is non-empty, clear with `bb_put` `/repositories/<ws>/<repo>/pullrequests/<id>` and body `{"title": "<same title>", "reviewers": []}`, then re-check. No one gets pinged — not even default CODEOWNERS reviewers.
 

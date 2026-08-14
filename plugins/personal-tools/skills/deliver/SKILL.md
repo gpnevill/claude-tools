@@ -1,6 +1,6 @@
 ---
 name: deliver
-description: Orchestrate the full delivery lifecycle for a ticket or described piece of work - fresh worktree, exhaustive interrogation-based planning, implementation, review, UI testing, iteration loops, ship to test, PR with description, and moving tickets to review. Use when the user says "deliver MP-1234", "run the full pipeline on this", or invokes /deliver.
+description: Orchestrate the full delivery lifecycle for a ticket or described piece of work - fresh worktree, exhaustive interrogation-based planning, implementation, review, UI testing, iteration loops, ship to test, PR with description, and moving tickets to review. Use when the user says "deliver M2X-1234", "run the full pipeline on this", or invokes /deliver.
 argument-hint: '<ticket-key and/or work description>'
 ---
 
@@ -78,7 +78,7 @@ Each round:
 
 ## Phase 5 — Commit
 
-Stage and commit all work in the worktree with conventional-commit message(s); behavioral changes carry the ticket key (`feat: [MP-1234] …`).
+Stage and commit all work in the worktree with conventional-commit message(s); behavioral changes carry the ticket key (`feat: [M2X-1234] …`).
 
 ## Phase 6 — User confirmation
 

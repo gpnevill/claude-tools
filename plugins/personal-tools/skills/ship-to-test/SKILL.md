@@ -14,7 +14,7 @@ Fixed workflow constants: destination branch `test`, dev-branch prefix `dev/`, c
 1. **Working branch**: the skill argument if one was given (must exist locally), otherwise the current branch.
    - Must match `^(feat|fix|bugfix|chore|hotfix)/`. If it is `test`, `master`, or a `dev/*` branch, abort and tell the user.
 2. **Dev branch name**: swap the prefix for `dev`, keep the rest verbatim.
-   `feat/MP-22718-tank-readiness-macro-report` → `dev/MP-22718-tank-readiness-macro-report`
+   `feat/M2X-22718-tank-readiness-macro-report` → `dev/M2X-22718-tank-readiness-macro-report`
 3. **Workspace/repo**: parse from `git remote get-url origin` (strip `git@bitbucket.org:` or `https://bitbucket.org/`, strip `.git`) → `<ws>/<repo>`.
 4. `git fetch origin test master release`
 5. **Base branch**: the working branch may sit on top of either `master` or `release`. Detect which — getting this wrong ships base-branch history into `test`:
@@ -78,7 +78,7 @@ If none, create one with `bb_post` `/repositories/<ws>/<repo>/pullrequests`:
 }
 ```
 
-Title humanization (Bitbucket-default style): capitalize the first letter, replace hyphens with spaces, but keep ticket tokens (`[A-Z]+-\d+`) intact: `dev/MP-23049-interpolate-properly` → `Dev/MP-23049 interpolate properly`.
+Title humanization (Bitbucket-default style): capitalize the first letter, replace hyphens with spaces, but keep ticket tokens (`[A-Z]+-\d+`) intact: `dev/M2X-23049-interpolate-properly` → `Dev/M2X-23049 interpolate properly`.
 
 **Reviewer scrub (mandatory):** immediately `bb_get` the PR (`jq: "{id: id, reviewers: reviewers}"`). Bitbucket's CODEOWNERS integration may auto-populate reviewers even when the create call passed an empty list. If reviewers is non-empty, clear it with `bb_put` `/repositories/<ws>/<repo>/pullrequests/<id>` and body `{"title": "<same title>", "reviewers": []}`, then re-check. No one gets pinged.
 

@@ -1,6 +1,6 @@
 ---
 name: move-ticket-to-review
-description: Move a Jira ticket to the Review status and assign the right reviewer - chosen by the user from the ticket's reporter and commenters, or anyone else via Other. Use when the user says "move MP-1234 to review", "put this ticket in review", or invokes /move-ticket-to-review.
+description: Move a Jira ticket to the Review status and assign the right reviewer - chosen by the user from the ticket's reporter and commenters, or anyone else via Other. Use when the user says "move M2X-1234 to review", "put this ticket in review", or invokes /move-ticket-to-review.
 argument-hint: '<ticket-key>'
 ---
 

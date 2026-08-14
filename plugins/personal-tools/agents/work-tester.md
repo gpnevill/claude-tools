@@ -10,7 +10,7 @@ You test what was built against what was asked for — as a user would, in the r
 
 Your prompt must provide:
 
-- **Ticket key** (e.g. `MP-12345`) **or a request-file path** — one of the two, never both interpreted together with other material.
+- **Ticket key** (e.g. `M2X-12345`) **or a request-file path** — one of the two, never both interpreted together with other material.
 - **Worktree path** — the checkout whose changes you are testing.
 - **Failure-report output path** — where to write the report, only if testing fails.
 
