@@ -1,6 +1,6 @@
 ---
 name: deliver
-description: Orchestrate the full delivery lifecycle for a ticket or described piece of work - fresh worktree, exhaustive interrogation-based planning, implementation, review, UI testing, iteration loops, ship to test, PR with description, and moving tickets to review. Use when the user says "deliver M2X-1234", "run the full pipeline on this", or invokes /deliver.
+description: Orchestrate the full delivery lifecycle for a ticket or described piece of work - verify the working environment, exhaustive interrogation-based planning, implementation, review, UI testing, iteration loops, ship to test, PR with description, and moving tickets to review. Use when the user says "deliver M2X-1234", "run the full pipeline on this", or invokes /deliver.
 argument-hint: '<ticket-key and/or work description>'
 ---
 
@@ -13,7 +13,7 @@ Run the delivery lifecycle end to end. This skill is a state machine: it sequenc
 - **Handoffs are paths, never content.** Every plan, report, and request is a file; agents receive absolute paths and read the canonical bytes. Never paraphrase, summarize, or inline a plan or report into an agent prompt.
 - **Fresh agents, always.** Every launch of an implementer, reviewer, iterator, or tester is a new agent. Never continue a previous one, never reuse its context.
 - **Artifact numbering**: `NN` is the next unused zero-padded integer per prefix in the work dir (`gap-01.md`, `review-01.md`, `iteration-01.md`, `test-01.md`, …). Numbers are never reused, even for discarded rounds.
-- **Undo** means, in the worktree: `git reset --hard origin/<base>` then `git clean -fd`. It erases everything.
+- **Undo** means, in the worktree: `git reset --hard <start ref>` then `git clean -fd`, against the start ref Phase 0 recorded. It erases everything this run produced.
 - **Escalation valve**: if substantially the same failure survives three rounds of any loop, stop looping and put the situation to the user instead of grinding silently.
 
 ## Conventions
@@ -25,13 +25,10 @@ Run the delivery lifecycle end to end. This skill is a state machine: it sequenc
 ## Phase 0 — Setup
 
 1. Inputs: a ticket key (`[A-Z]+-\d+`) and/or a description of required work. Neither → ask and stop until provided.
-2. Create the work dir. Write the user's initial request **verbatim** to `request.md` — before anything else happens, and never edited afterwards.
-3. Ask via `AskUserQuestion`:
-   - **Base branch**: master / release / other (other → user names it).
-   - **Branch**: type `feat` or `fix`, and the slug — suggest `<type>/<KEY>-<short-slug>` (type suggested from the ticket's issue type when one exists).
-4. `git fetch origin <base>`, then create the worktree at the sibling location:
-   `git worktree add ~/Market2x/worktrees/<slug-dir> -b <branch> origin/<base>` (where `<slug-dir>` is the branch name without its `feat/`/`fix/` prefix).
-5. Switch the session into it with `EnterWorktree` (`path:` the new worktree). All subsequent phases operate there.
+2. Read the environment — branch (`git rev-parse --abbrev-ref HEAD`), worktree (`--show-toplevel`), start ref (`git rev-parse HEAD`) — and match it against the inputs: a ticket key must appear verbatim in the branch name; description-only work is a judgement on the branch slug, ambiguous counting as a mismatch. All subsequent phases operate in that worktree.
+3. On a mismatch: report that the working environment does not appear to be configured for this task, and ask via `AskUserQuestion` — **Exit**, for the user to configure it, or **Continue** on the current branch and worktree. Exit → stop, nothing written. Matched or not, flag a branch prefix outside `feat/`/`fix/`.
+4. Derive the base — `git fetch origin master release`, then `mbm=$(git merge-base origin/master <branch>)` against `mbr=$(git merge-base origin/release <branch>)`: equal → `master`; `mbm` an ancestor of `mbr` (`--is-ancestor`) → `release`; descended from neither → undetermined — and confirm it via `AskUserQuestion`, the detected value first, the other of master/release second, anything else via the built-in Other (undetermined → ask openly). The confirmed answer is the `<base>` every later phase uses.
+5. Create the work dir. Write the user's initial request **verbatim** to `request.md` — before anything else happens, and never edited afterwards.
 
 ## Phase 1 — Plan
 
