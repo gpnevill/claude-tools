@@ -1,12 +1,12 @@
 ---
 name: kickoff
-description: Kick off a semicolon-separated list of tickets and/or described pieces of work at once - per item, set up a Herdr worktree and start a Claude Code session in it running /deliver on that item. Use when the user says "kick off M2X-1234; M2X-1235", "start these in their own worktrees", or invokes /kickoff.
+description: Kick off a semicolon-separated list of tickets and/or described pieces of work at once - per item, set up a Herdr worktree and start a Claude Code session in it, in plan mode, running /deliver on that item. Use when the user says "kick off M2X-1234; M2X-1235", "start these in their own worktrees", or invokes /kickoff.
 argument-hint: '<ticket-key and/or work description>; <ticket-key and/or work description>; …'
 ---
 
 # Kickoff
 
-Fan a list of work items out into one Herdr worktree per item, each with its own Claude Code session already running `/deliver` on that item. This skill sets the worktrees up and starts those sessions; it never follows them.
+Fan a list of work items out into one Herdr worktree per item, each with its own Claude Code session in plan mode already running `/deliver` on that item. This skill sets the worktrees up and starts those sessions; it never follows them.
 
 ## Non-negotiable mechanics
 
@@ -58,10 +58,10 @@ Herdr agent names match `[a-z][a-z0-9_-]{0,31}` and must be unique among live ag
 ### 3.4 Start Claude Code
 
 ```bash
-herdr agent start <name> --kind claude --pane <pane id> --timeout 120000
+herdr agent start <name> --kind claude --pane <pane id> --timeout 120000 -- --permission-mode plan
 ```
 
-This returns only once Herdr has detected Claude in that pane and considers it ready for input. The startup allowance is raised over the 30-second default because a repository whose session hooks and configuration are slow to load would otherwise fail an item whose worktree already exists.
+The session starts in plan mode, so it reaches the user for approval before it writes anything. Arguments after `--` are Claude Code's own; everything before it is Herdr's. The startup allowance is raised over the 30-second default because a repository whose session hooks and configuration are slow to load would otherwise fail an item whose worktree already exists.
 
 A non-zero exit says nothing about why. Read the pane before concluding anything:
 
@@ -71,7 +71,15 @@ herdr pane read <pane id> --source detection --lines 40
 
 Report that output verbatim against the item and move to the next. Leave the worktree in place — what happens to a checkout no session took up is the user's call.
 
-### 3.5 Submit the delivery
+### 3.5 Check the session is taking input
+
+```bash
+herdr pane read <pane id> --source detection --lines 40
+```
+
+A zero exit from step 3.4 is not proof the session can be prompted: Claude Code asks a first-time repository whether its folder is trusted, and Herdr reports that agent as started and idle with the question still on screen. Read the pane and expect Claude's empty input prompt. Anything else — a trust question, a numbered choice, any confirmation — stops this item and is reported, because the next step's Enter would answer that question instead and the delivery would be lost under a zero exit status. Trust is recorded against the repository's main checkout, so at most the first worktree of a repository is ever affected.
+
+### 3.6 Submit the delivery
 
 ```bash
 herdr agent prompt <name> '/deliver <item>'
@@ -85,4 +93,4 @@ Never pass `--wait`: `/deliver` runs for as long as the work takes and puts ques
 
 One row per item: the item text, worktree path, branch, Herdr workspace label, agent name, and that the `/deliver` prompt was submitted — or, for an item that did not get that far, the step that stopped it and why.
 
-Close by saying that the deliveries are now running in their own sessions, that some are likely already waiting on the user's answers, and that this session has not moved.
+Close by saying that each session is running in plan mode and will ask for approval there before it writes anything, that some are likely already waiting on the user, and that this session has not moved.
