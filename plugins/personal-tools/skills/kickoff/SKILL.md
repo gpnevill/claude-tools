@@ -53,7 +53,7 @@ Anything but exactly one pane id — no workspace open on the path, or a pane co
 
 ### 3.3 Name the agent
 
-Herdr agent names match `[a-z][a-z0-9_-]{0,31}` and must be unique among live agents. Take the branch from step 3.1, drop its `<type>/` prefix and lowercase the rest (`feat/M2X-24022-bulk-endpoint` → `m2x-24022-bulk-endpoint`), replacing any other character with `-` and prefixing a letter when the result would not otherwise start with one. Check it against `herdr agent list` and suffix `-2`, `-3`, … until it is unique, trimming the tail to fit 32 characters including the suffix.
+Herdr agent names match `[a-z][a-z0-9_-]{0,31}` and must be unique among live agents. Lowercase the ticket key (`M2X-23659` → `m2x-23659`), or take the branch's slug when there is no ticket, replacing any other character with `-` and prefixing a letter when the result would not otherwise start with one. Check it against `herdr agent list` and suffix `-2`, `-3`, … until it is unique, trimming the tail to fit 32 characters including the suffix.
 
 ### 3.4 Start Claude Code
 

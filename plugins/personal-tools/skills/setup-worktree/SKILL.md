@@ -42,10 +42,10 @@ If the branch already exists locally or on the remote, or a worktree already hol
 ## Step 5 — Create the worktree
 
 ```bash
-herdr worktree create --cwd "$PWD" --branch <branch> --base origin/<base> --label <KEY, or the slug when there is no ticket> --no-focus
+herdr worktree create --cwd "$PWD" --branch <branch> --base origin/<base> --label <branch without its type prefix> --no-focus
 ```
 
-`--path` is omitted so Herdr places the checkout; `--no-focus` leaves this session focused where it is.
+The label is the branch stripped of `feat/` or `fix/`, so `fix/M2X-23659-location-instruction-staleness` labels its workspace `M2X-23659-location-instruction-staleness`. `--path` is omitted so Herdr places the checkout; `--no-focus` leaves this session focused where it is.
 
 Success prints one JSON line: the checkout is `.result.worktree.path`, the workspace `.result.workspace.label` (`.result.worktree.label` is the repository's name, not the label passed in). A non-zero exit, or a response without that path, is a stop — report the CLI's stderr verbatim. Never fall back to `git worktree add`: Herdr manages the worktrees, and one created behind its back has no workspace.
 
