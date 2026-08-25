@@ -45,16 +45,16 @@ Report the findings in chat: what was verified, how, the extent, and anything th
 
 **Body sections, in this order:**
 
-- **Background** (or **Problem**, whichever fits the subject — a requirement or a defect) — required, first. The requirement or the observed behaviour that calls for the work: what happens now, what is expected instead, and who or what it affects. A few sentences or a short bullet list.
+- **Background** (or **Problem**, whichever fits the subject — a requirement or a defect) — required, first. The requirement or the observed behaviour that calls for the work: what happens now, what is expected instead, and who or what it affects. Technical detail — an error, a log excerpt, light technical language, a specification — is allowed here where it is relevant, never required.
 - **Detailed requirements** — optional, and genuinely rare. Only for product-level specifics too granular for acceptance criteria: the validation expected on every field of a new API, the exact data dependencies that must trigger a reactive process. Where present, the acceptance criteria reference it rather than restate it. Its absence is the normal case; never manufacture one.
 - **Acceptance criteria** — required, last. Observable outcomes a reviewer can check, each a single testable statement about resulting behaviour, never about the means.
 
-The investigation's findings **shape** the ticket — they set its scope and let the problem be stated precisely — but they do not enter it. Everything code-specific that the investigation produced stays in the chat report.
+The investigation's findings **shape** the ticket — they set its scope and let the problem be stated precisely — and its evidence may be quoted where it helps the reader recognise the issue. Where the issue was traced to stays in the chat report.
 
 The draft contains none of:
 
 - file paths, or function, class, component, table or variable names;
-- code blocks or snippets;
+- code blocks or snippets — an error or log excerpt is neither;
 - a proposed fix, an implementation approach, or an effort estimate;
 - narration of the investigation, or of this session.
 
