@@ -71,20 +71,20 @@ Ask both in a single `AskUserQuestion` call, inferred option first; skip an axis
 
 If the create metadata for that project and issue type exposes an acceptance-criteria field, the criteria go **there** and the description ends at the background (and detailed requirements); otherwise they are the description's last section.
 
-**Assignee and priority**: a second `AskUserQuestion` call once the project is settled. Each offers a suggestion first then **Jira default**; the built-in Other takes any other value, resolved via `lookupJiraAccountId` or the project's priority scheme.
+**Assignee, priority and parent epic**: a second `AskUserQuestion` call once the project is settled, the epic asked only where the issue type takes one. Each offers a suggestion first then **Jira default**; the built-in Other takes any other value, resolved via `lookupJiraAccountId`, the project's priority scheme, or an epic search of the project.
 
-Every remaining field is left to Jira's defaults. Reporter, labels, sprint, epic and components are not this skill's to guess.
+Every remaining field is left to Jira's defaults. Reporter, labels, sprint and components are not this skill's to guess.
 
 ## Step 5 — Approval gate
 
-Present the draft in full — summary, project, issue type, assignee, priority, the links to be filed, and every section verbatim as it will be filed — then ask via `AskUserQuestion` to create or amend. Amend → apply, re-present, ask again. Create only on an explicit yes.
+Present the draft in full — summary, project, issue type, assignee, priority, parent epic, the links to be filed, and every section verbatim as it will be filed — then ask via `AskUserQuestion` to create or amend. Amend → apply, re-present, ask again. Create only on an explicit yes.
 
 This gate is separate from Step 2's and stands in every case — including one that needed no investigation, and one whose findings gate already returned yes: a ticket is visible to other people, and the draft is the user's only chance to see it before they are.
 
 ## Step 6 — Create and verify
 
-`createJiraIssue`, then `createJiraIssueLink` where specified. Re-read with `getJiraIssue` and check the summary, sections, acceptance criteria, assignee, priority and links all landed where they were meant to. Anything dropped, mangled or refused is fixed with `editJiraIssue` and re-verified, or reported exactly as it stands — never silently accepted.
+`createJiraIssue`, then `createJiraIssueLink` where specified. Re-read with `getJiraIssue` and check the summary, sections, acceptance criteria, assignee, priority, parent epic and links all landed where they were meant to. Anything dropped, mangled or refused is fixed with `editJiraIssue` and re-verified, or reported exactly as it stands — never silently accepted.
 
 ## Step 7 — Report
 
-Ticket key and URL, project and issue type, assignee, priority, the links created, the sections it holds, and where the acceptance criteria went. State plainly anything left for the user to correct in Jira.
+Ticket key and URL, project and issue type, assignee, priority, parent epic, the links created, the sections it holds, and where the acceptance criteria went. State plainly anything left for the user to correct in Jira.
