@@ -58,7 +58,7 @@ The draft contains none of:
 - a proposed fix, an implementation approach, or an effort estimate;
 - narration of the investigation, or of this session.
 
-Plain headings and short bullets only, minimal tables if valuable, so the body survives whatever the description field accepts.
+Plain headings, concise prose (background/problem), and short bullets (acceptance criteria) only, minimal tables if valuable, so the body survives whatever the description field accepts.
 
 A relationship to another ticket is carried by its link, not by prose in the body.
 
