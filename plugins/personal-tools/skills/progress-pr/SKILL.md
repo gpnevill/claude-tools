@@ -1,12 +1,12 @@
 ---
 name: progress-pr
-description: Progress a semicolon-separated list of pull requests through the state tree in pr-workflow.yaml - per pull request, derive its state from live evidence and its log, run the actions that apply there, offload the long-lived ones to their own Herdr sessions, and log everything to PRS.md. Use when the user says "progress PR 1234; 1235", "move these pull requests along", or invokes /progress-pr.
+description: Progress a semicolon-separated list of pull requests through the state tree in pr-workflow.yaml - per pull request, derive its states from live evidence and its log, run the actions that apply there, offload the long-lived ones to their own Herdr sessions, and log everything to PRS.md. Use when the user says "progress PR 1234; 1235", "move these pull requests along", or invokes /progress-pr.
 argument-hint: '<pr-id>; <pr-id>; …'
 ---
 
 # Progress PR
 
-Advance each of a list of pull requests by one turn of the state tree in `pr-workflow.yaml`. This skill derives state, runs actions and logs; what any state means is the workflow file's to say.
+Advance each of a list of pull requests by one turn of the state tree in `pr-workflow.yaml`. This skill derives states, runs actions and logs; what any state means is the workflow file's to say.
 
 All Bitbucket API operations use the `mcp__bitbucket__bb_*` MCP tools (load them via ToolSearch if deferred).
 
@@ -61,21 +61,17 @@ Then one `AskUserQuestion` question per pull request, batched up to four questio
 
 `bb_get` `/repositories/<ws>/<repo>/pullrequests/<id>` for its state, author, reviewers and branches, and `/repositories/<ws>/<repo>/pullrequests/<id>/comments` with `queryParams: {"pagelen": "100"}` for who last said what. Then its own log.
 
-### 4.2 Derive the state
+### 4.2 Derive the states
 
-Walk the tree from the top. At each level, evaluate **every** sibling's `when`:
+Walk the tree from the top, evaluating **every** state's `when` at each level and descending into each one that holds. Siblings need not exclude each other — a pull request matching two of them is at both, and every branch entered is active. A branch stops where no child holds, and the root is a valid resting place.
 
-- **Exactly one holds** → descend into it and repeat over its `states`.
-- **None holds** → the walk stops; the node it stopped at is the state, and the root is a valid resting place.
-- **More than one holds** → **fail this pull request loudly**. Name the states that matched and the evidence each matched on, log it, and move to the next one; sibling states must be mutually exclusive.
+Log each active state as a `/`-joined path of ids — `reviewing / raised-by-a-person`, or `(root)` where no top-level state held — **every time it is derived**. A `when` may test what earlier runs derived.
 
-Log the derived state as a `/`-joined path of ids — `reviewing / raised-by-a-person`, or `(root)` where no top-level state held — **every time it is derived**. A `when` may test what earlier runs derived.
-
-A derived state with `closes_workflow: true` goes straight to 4.8. Otherwise, follow the `instruction` of every state on the path that has one.
+Straight to 4.8 only where every active state carries `closes_workflow: true`; one live state alongside means the workflow is not over, and the closing one contributes nothing. Otherwise, follow the `instruction` of every active state that has one.
 
 ### 4.3 Collect the applicable actions
 
-The file's top-level `actions` first, then each state's on the path in turn, ending with the derived state's own. Drop any whose `when` does not hold. None left → log the derivation and go to 4.7.
+The file's top-level `actions` first, then every active state's, in the order the tree declares them — a state active on two branches contributes its actions once. Drop any whose `when` does not hold. None left → log the derivation and go to 4.7.
 
 ### 4.4 Run them, in order
 
@@ -130,7 +126,7 @@ Every applicable action having been run, ask **Progress again** or **Done with t
 
 ### 4.8 Close out
 
-A derived state with `closes_workflow: true` ends the pull request's workflow and offers nothing else. Show what would be lost first:
+Every active state carrying `closes_workflow: true` ends the pull request's workflow and offers nothing else. Show what would be lost first:
 
 ```bash
 git -C <worktree path> status --short
@@ -141,4 +137,4 @@ Ask via `AskUserQuestion` to close out or leave it open, with that summary in th
 
 ## Step 5 — Report
 
-Open with the repository this run was scoped to. Then per pull request: the derived state, what was run or offloaded, the workspace, tab and agent of anything offloaded, and the log lines written — or that it was skipped, or the step that stopped it and why. Close by naming the sessions now running.
+Open with the repository this run was scoped to. Then per pull request: the derived states, what was run or offloaded, the workspace, tab and agent of anything offloaded, and the log lines written — or that it was skipped, or the step that stopped it and why. Close by naming the sessions now running.

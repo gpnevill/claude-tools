@@ -57,17 +57,19 @@ states:
     # Required.
     name: Human readable name
 
-    # Required. Prose test for "the item is at this state". Siblings must be mutually
-    # exclusive: an item matching two of them fails loudly and is not progressed.
+    # Required. Prose test for "the item is at this state". Siblings need not exclude
+    # each other — an item matching two of them is at both, and takes the actions of
+    # each and of every state active beneath them.
     when: The item is open and assigned to me.
 
     # Optional. Followed at this state and at every state beneath it, before any
     # action is offered.
     instruction: Read the item's comments in full.
 
-    # Optional, default false. Landing here ends the item's workflow — its worktree is
-    # removed and its entry archived, after confirmation. A closing state offers
-    # close-out and nothing else, so `actions` and `states` are not read on it.
+    # Optional, default false. Landing here with nothing else active ends the item's
+    # workflow — its worktree is removed and its entry archived, after confirmation.
+    # A closing state offers close-out and nothing else, so `actions` and `states` are
+    # not read on it, and a live state alongside it makes it contribute nothing.
     closes_workflow: false
 
     # Optional. Apply at this state and at every state beneath it. Same shape as the
@@ -81,8 +83,8 @@ states:
         auto_commit: false
 
     # Optional. Child states, the same shape as this one, to any depth. The walk
-    # descends while exactly one child's `when` holds, and stops at a leaf or where no
-    # child holds — a state with children is a valid resting place, and so is the root.
+    # descends into every child whose `when` holds, and a branch stops at a leaf or
+    # where none holds — a state with children is a valid resting place, so is the root.
     states:
       - id: child-state-id
         name: Human readable name
