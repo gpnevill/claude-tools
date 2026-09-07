@@ -1,0 +1,96 @@
+# Schema for ticket-workflow.yaml and pr-workflow.yaml, both in CLAUDE_CONFIG_DIR.
+#
+# A workflow file is a tree of states over one class of item. progress-ticket and
+# progress-pr derive an item's state by walking the tree, then offer the actions that
+# apply where it lands. They impose no lifecycle of their own.
+#
+# Prose fields — when, instruction, description, prompt — are read and judged by the
+# agent. Name the evidence each is to be judged against; an item's own log is evidence,
+# so a `when` may test what a previous run derived or did.
+#
+# Never author an option for skipping an item. The skills always offer one.
+
+# Optional. Actions that apply to every item, wherever it lands in the tree.
+actions:
+
+  - # Required. Kebab-case, unique among the actions that can apply together.
+    id: action-id
+
+    # Required. At most five words. Shown verbatim as the choice.
+    label: Ask the reporter
+
+    # Optional. One line, shown under the label.
+    description: Comment asking for what is missing.
+
+    # Optional. Prose test for whether this action applies. Omitted, it applies
+    # wherever the state carrying it applies.
+    when: No one has commented on the item in the last week.
+
+    # Required. What to do.
+    instruction: >-
+      Ask me what is missing, then post it as a comment addressed to the reporter.
+
+    # Required. true is carried out in the current session. false is offloaded to a
+    # Claude Code session of its own in the item's worktree.
+    synchronous: true
+
+    # Required. true begins the action without asking. false offers it as a choice.
+    auto_start: false
+
+    # Required. true lets the action's outward effect land unasked — the comment
+    # posted, the message sent, the status changed. false prepares that effect, shows
+    # it, and asks before it lands. Neither field has any bearing on the permission
+    # mode of an offloaded session, which is always auto.
+    auto_commit: false
+
+    # Optional, and only read for offloaded work. Used verbatim as that session's
+    # prompt. Omitted, one is written from `instruction`.
+    prompt: >-
+      Review this item and report what is blocking it. Change nothing.
+
+# Required. The top level of the state tree.
+states:
+
+  - # Required. Kebab-case, unique among its siblings.
+    id: state-id
+
+    # Required.
+    name: Human readable name
+
+    # Required. Prose test for "the item is at this state". Siblings must be mutually
+    # exclusive: an item matching two of them fails loudly and is not progressed.
+    when: The item is open and assigned to me.
+
+    # Optional. Followed at this state and at every state beneath it, before any
+    # action is offered.
+    instruction: Read the item's comments in full.
+
+    # Optional, default false. Landing here ends the item's workflow — its worktree is
+    # removed and its entry archived, after confirmation. A closing state offers
+    # close-out and nothing else, so `actions` and `states` are not read on it.
+    closes_workflow: false
+
+    # Optional. Apply at this state and at every state beneath it. Same shape as the
+    # top-level `actions` above.
+    actions:
+      - id: hand-it-back
+        label: Hand it back
+        instruction: Ask me who should take it, reassign it, and comment saying why.
+        synchronous: true
+        auto_start: false
+        auto_commit: false
+
+    # Optional. Child states, the same shape as this one, to any depth. The walk
+    # descends while exactly one child's `when` holds, and stops at a leaf or where no
+    # child holds — a state with children is a valid resting place, and so is the root.
+    states:
+      - id: child-state-id
+        name: Human readable name
+        when: The log holds no line saying this item has been read.
+        actions:
+          - id: record-what-it-asks-for
+            label: Record what it asks for
+            instruction: Write one line into the log saying what the item asks for.
+            synchronous: true
+            auto_start: true
+            auto_commit: true
