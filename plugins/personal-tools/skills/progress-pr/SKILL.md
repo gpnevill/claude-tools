@@ -1,0 +1,144 @@
+---
+name: progress-pr
+description: Progress a semicolon-separated list of pull requests through the state tree in pr-workflow.yaml - per pull request, derive its state from live evidence and its log, run the actions that apply there, offload the long-lived ones to their own Herdr sessions, and log everything to PRS.md. Use when the user says "progress PR 1234; 1235", "move these pull requests along", or invokes /progress-pr.
+argument-hint: '<pr-id>; <pr-id>; …'
+---
+
+# Progress PR
+
+Advance each of a list of pull requests by one turn of the state tree in `pr-workflow.yaml`. This skill derives state, runs actions and logs; what any state means is the workflow file's to say.
+
+All Bitbucket API operations use the `mcp__bitbucket__bb_*` MCP tools (load them via ToolSearch if deferred).
+
+## Non-negotiable mechanics
+
+- **This session never moves.** Never `cd` into a worktree, never adopt one as this session's working directory, never focus a workspace, tab or agent it opens.
+- **Pull requests are independent.** Whatever stops one is reported against that one alone; the rest still run.
+- **An action that cannot be carried out is a failure to report**, never something to approximate with a different action.
+
+## Step 1 — Preconditions
+
+```bash
+test "${HERDR_ENV:-}" = 1
+git rev-parse --show-toplevel
+git remote get-url origin
+```
+
+Not inside Herdr → this session cannot open workspaces or start agents; stop and say so. Not inside a git repository, or an origin that is not a bitbucket.org remote → stop. Parse workspace and repo from origin — strip `git@bitbucket.org:` or `https://bitbucket.org/` and a trailing `.git` — to give `<ws>/<repo>`.
+
+## Step 2 — Parse and load
+
+Split the argument on `;`, trim, drop the empties. Each segment is a bare id or a Bitbucket PR URL, from which the number after `pull-requests/` is taken; a URL naming a different `<ws>/<repo>` than origin stops that segment. No ids → ask for them and stop until given. List them back.
+
+Read `pr-workflow.yaml` and `PRS.md`, both in user scope in `CLAUDE_CONFIG_DIR`, in full and now — their current content is the specification, never memory of it. Create `PRS.md` if missing, as a bare `# Pull requests` heading.
+
+Every pull request without an entry gets one:
+
+```markdown
+## PR 1234 — Pull request title
+
+- **Source branch**: feat/M2X-1234-something
+- **Link**: https://bitbucket.org/<ws>/<repo>/pull-requests/1234
+
+### Log
+
+- 2026-09-06T09:12:03+00:00 — Entry created.
+```
+
+Timestamps come from `date -Iseconds`.
+
+## Step 3 — Gather what is shared, and choose the pull requests
+
+`bb_get` `/user` for my own account uuid — the tree's `when` tests are written in the first person and cannot be evaluated without it — and `herdr worktree list --cwd "$PWD"`, re-read in 4.6 where an offloaded action needs a current one. Both hold for every pull request and are read once.
+
+Bitbucket has no assignee. Where the workflow speaks of a pull request being someone's, the evidence is `author.uuid` and `reviewers[].uuid`.
+
+Then one `AskUserQuestion` question per pull request, batched up to four questions per call, offering **Progress** and **Skip**. A skipped pull request is logged as skipped and takes no further part in the run.
+
+## Step 4 — Per pull request, in order
+
+### 4.1 Gather the pull request's evidence
+
+`bb_get` `/repositories/<ws>/<repo>/pullrequests/<id>` for its state, author, reviewers and branches, and `/repositories/<ws>/<repo>/pullrequests/<id>/comments` with `queryParams: {"pagelen": "100"}` for who last said what. Then its own log.
+
+### 4.2 Derive the state
+
+Walk the tree from the top. At each level, evaluate **every** sibling's `when`:
+
+- **Exactly one holds** → descend into it and repeat over its `states`.
+- **None holds** → the walk stops; the node it stopped at is the state, and the root is a valid resting place.
+- **More than one holds** → **fail this pull request loudly**. Name the states that matched and the evidence each matched on, log it, and move to the next one; sibling states must be mutually exclusive.
+
+Log the derived state as a `/`-joined path of ids — `reviewing / raised-by-a-person`, or `(root)` where no top-level state held — **every time it is derived**. A `when` may test what earlier runs derived.
+
+A derived state with `closes_workflow: true` goes straight to 4.8. Otherwise, follow the `instruction` of every state on the path that has one.
+
+### 4.3 Collect the applicable actions
+
+The file's top-level `actions` first, then each state's on the path in turn, ending with the derived state's own. Drop any whose `when` does not hold. None left → log the derivation and go to 4.7.
+
+### 4.4 Run them, in order
+
+Four passes, each of them top-level down:
+
+1. Every action with `auto_start: true` and `auto_commit: true`.
+2. Every action with `auto_start: true` and `auto_commit: false`.
+3. Ask about the rest — one `AskUserQuestion` question per action, batched up to four questions per call, each offering **Yes**, **No** and **Skip**, with anything else via the built-in Other. **No** and **Skip** are logged as a decision taken against the action, where a later `when` can see it.
+4. Every action answered yes.
+
+An action's `synchronous` field decides how it is carried out, in every pass alike — `true` in this session (4.5), `false` in a session of its own (4.6). A second progression from 4.7 runs these passes exactly as written, save that every action counts as `auto_start: false` — nothing repeats itself unasked.
+
+### 4.5 Carrying out a synchronous action
+
+Carry out `instruction`. With `auto_commit: false`, show what is about to land — the comment text, the reviewer change, the approval — and ask before it lands, applying whatever the user changes. With `auto_commit: true` it lands unasked. Then re-read what was written and confirm it landed; a mismatch is a failure to report, not to silently accept. A `bb_put` to a pull request echoes its title and reviewers back unchanged, because Bitbucket clears reviewers when the field is omitted. Log the action and its outcome.
+
+### 4.6 Carrying out an offloaded action
+
+Locate the pull request's worktree by matching each open worktree's `branch` against its source branch. No worktree → invoke `/setup-worktree <the source branch>`, which is the only permitted way to create one; take the worktree path from its report.
+
+Open a tab for the action and take its pane from `.result.root_pane.pane_id`:
+
+```bash
+herdr tab create --workspace <ws-id> --cwd <worktree path> --label <action id> --no-focus
+```
+
+One tab per action, all in the one workspace. The workspace id of a worktree this skill did not just create comes from `herdr worktree list --cwd "$PWD"`.
+
+Name the agent for the id and the action — `1234` + `review-it` → `pr-1234-review-it` — replacing other characters with `-`, trimming to 32 characters, and suffixing `-2`, `-3`, … against `herdr agent list` until unique:
+
+```bash
+herdr agent start <name> --kind claude --pane <pane id> --timeout 120000 -- --permission-mode auto
+herdr pane read <pane id> --source detection --lines 40
+```
+
+Offloaded sessions always run in auto permission mode, whatever the action's `auto_start` and `auto_commit` say. Expect Claude's empty input prompt in that read — a trust question or any other confirmation stops this action and is reported, because the next command's Enter would answer that instead.
+
+```bash
+herdr agent prompt <name> '<prompt>'
+```
+
+The action's `prompt` is used **verbatim** when it has one; otherwise write a brief one from `instruction`, adding no detail the workflow did not state. Name the pull request by id in either case, since the session starts knowing only its checkout. Append to the prompt:
+
+- with `auto_commit: false`, that nothing is to be posted, approved or changed until the user has seen it and approved it;
+- that when the work is done, one line is to be appended to the `## PR <id>` entry's `### Log` in `$CLAUDE_CONFIG_DIR/PRS.md` — timestamped with `date -Iseconds`, saying whether `<action id>` completed or failed and, on a failure, why — and that nothing else in that file is to change.
+
+Quote the whole prompt as one single-quoted argument, escaping any embedded single quote. Never pass `--wait`. Log the action started, with its workspace, tab and agent.
+
+### 4.7 Progress again, or done
+
+Every applicable action having been run, ask **Progress again** or **Done with this pull request**. Progress again → back to 4.2, deriving afresh, since what has just run may have moved the pull request. A derivation that leaves nothing to run says so and moves on.
+
+### 4.8 Close out
+
+A derived state with `closes_workflow: true` ends the pull request's workflow and offers nothing else. Show what would be lost first:
+
+```bash
+git -C <worktree path> status --short
+git -C <worktree path> log --branches --not --remotes --oneline
+```
+
+Ask via `AskUserQuestion` to close out or leave it open, with that summary in the question. On yes, `herdr worktree remove --workspace <ws-id>`, asking again before `--force` on a refusal over uncommitted changes. Then move the entry, log and all, to `PRS_ARCHIVE.md` alongside `PRS.md`, appending a closing line, and delete it from `PRS.md`.
+
+## Step 5 — Report
+
+Open with the repository this run was scoped to. Then per pull request: the derived state, what was run or offloaded, the workspace, tab and agent of anything offloaded, and the log lines written — or that it was skipped, or the step that stopped it and why. Close by naming the sessions now running.
