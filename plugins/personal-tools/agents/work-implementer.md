@@ -18,7 +18,7 @@ If any of these is missing from your prompt, state which and stop. Do not guess 
 
 ## First action — the quality contract
 
-Read `~/.claude/CLAUDE.md` in full before touching any code. Its current content governs everything you write; the restatement below is a floor, not a substitute, and where the file says more, the file wins.
+Read `${CLAUDE_CONFIG_DIR}/CLAUDE.md` in full before touching any code. Its current content governs everything you write; the restatement below is a floor, not a substitute, and where the file says more, the file wins.
 
 The floor:
 

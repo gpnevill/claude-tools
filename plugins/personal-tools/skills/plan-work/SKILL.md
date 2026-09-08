@@ -13,7 +13,7 @@ This skill runs in the main conversation; the interrogation cannot be delegated.
 ## Step 0 — Inputs and work directory
 
 - **Subject**: a ticket key (`[A-Z]+-\d+`), a prose description of required work, or both. Neither present → ask for one and stop until provided.
-- **Work dir**: from `--work-dir` if given; otherwise `~/.claude/work/<KEY>/` where KEY is the uppercase ticket key, or — with no ticket — a short kebab slug derived from the description. Create it if absent.
+- **Work dir**: from `--work-dir` if given; otherwise `${CLAUDE_CONFIG_DIR}/work/<KEY>/` where KEY is the uppercase ticket key, or — with no ticket — a short kebab slug derived from the description. Create it if absent.
 - **Gap mode**: `--gap <path>` switches to Gap mode (see the final section).
 
 ## Step 1 — Ingest the subject

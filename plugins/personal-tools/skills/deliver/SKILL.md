@@ -19,7 +19,7 @@ Run the delivery lifecycle end to end. This skill is a state machine: it sequenc
 ## Conventions
 
 - **KEY**: the uppercase ticket key; with no ticket, a short kebab slug derived from the work description.
-- **Work dir**: `~/.claude/work/<KEY>/`.
+- **Work dir**: `${CLAUDE_CONFIG_DIR}/work/<KEY>/`.
 - **Plan set**: `plan.md` plus every approved `iteration-NN.md`, in creation order. Precedence: iteration plans supersede the base plan; later iteration plans supersede earlier ones. Every reviewer and iterator receives the full set with this precedence stated.
 
 ## Phase 0 — Setup
@@ -42,7 +42,7 @@ Launch a fresh `work-implementer` agent with exactly: the worktree path, the pla
 
 1. Undo.
 2. Invoke `/plan-work` with `--work-dir <work dir> --gap <gap path>`; wait for the re-approved plan.
-3. Draft concrete improvement suggestions for `~/.claude/skills/plan-work/SKILL.md` — what interrogation would have surfaced these decisions up front — and present them to the user. Apply only what the user approves; never edit the skill unprompted.
+3. Draft concrete improvement suggestions for `${CLAUDE_PLUGIN_ROOT}/skills/plan-work/SKILL.md` — what interrogation would have surfaced these decisions up front — and present them to the user. Apply only what the user approves; never edit the skill unprompted.
 4. Launch a fresh implementer with the improved plan. Repeat this phase until an implementer reports `DONE`.
 
 ## Phase 3 — Review loop
@@ -54,7 +54,7 @@ Each round `N`:
 3. **Any `plan-conformance` failure** (regardless of other categories):
    - Undo.
    - Tighten the plan yourself — no interrogator: edit `plan.md` (and affected iteration plans) so the deviated decisions are stated strictly enough that the deviation cannot recur. Tightening adds precision to decided things; it never adds new decisions — a missing decision is a gap, and belongs to Phase 2's gap route.
-   - Draft improvement suggestions for `~/.claude/skills/plan-work/SKILL.md` and/or `~/.claude/agents/work-implementer.md` — non-conformance should be impossible if those two are well-defined — and present them to the user; apply only on approval.
+   - Draft improvement suggestions for `${CLAUDE_PLUGIN_ROOT}/skills/plan-work/SKILL.md` and/or `${CLAUDE_PLUGIN_ROOT}/agents/work-implementer.md` — non-conformance should be impossible if those two are well-defined — and present them to the user; apply only on approval.
    - Launch a fresh implementer (Phase 2 discipline), then restart this loop.
 4. **Other failures** (`quality` / `correctness` / `build`):
    - Invoke `/check-failure-report` on `review-NN.md`.

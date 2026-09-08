@@ -30,7 +30,7 @@ Read every changed and added file in full, plus enough surrounding code to judge
 
 ### 1. Code quality
 
-Read `~/.claude/CLAUDE.md` in full, fresh, before judging anything — its current content is the standard; the restatement below is a floor, and where the file says more, the file wins.
+Read `${CLAUDE_CONFIG_DIR}/CLAUDE.md` in full, fresh, before judging anything — its current content is the standard; the restatement below is a floor, and where the file says more, the file wins.
 
 The floor:
 
