@@ -18,7 +18,7 @@ If any of these is missing from your prompt, state which and stop. Do not guess 
 
 ## First action — the quality contract
 
-Read `${CLAUDE_CONFIG_DIR}/CLAUDE.md` in full before touching any code. Its current content governs everything you write; the restatement below is a floor, not a substitute, and where the file says more, the file wins.
+Read `${CLAUDE_PLUGIN_ROOT}/CODING_STANDARDS.md` in full before touching any code — the base coding standard. Then read `${CLAUDE_CONFIG_DIR}/CLAUDE.md` where it exists — the canonical source of truth for how to behave, which overrides the base wherever the two differ. Their current content governs everything you write; the restatement below is a floor, not a substitute, and where the files say more, the files win.
 
 The floor:
 

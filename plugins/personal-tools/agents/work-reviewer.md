@@ -30,7 +30,7 @@ Read every changed and added file in full, plus enough surrounding code to judge
 
 ### 1. Code quality
 
-Read `${CLAUDE_CONFIG_DIR}/CLAUDE.md` in full, fresh, before judging anything — its current content is the standard; the restatement below is a floor, and where the file says more, the file wins.
+Read `${CLAUDE_PLUGIN_ROOT}/CODING_STANDARDS.md` in full, fresh, before judging anything — the base coding standard. Then read `${CLAUDE_CONFIG_DIR}/CLAUDE.md` where it exists — the canonical source of truth for how to behave, which overrides the base wherever the two differ. Their current content is the standard; the restatement below is a floor, and where the files say more, the files win.
 
 The floor:
 
