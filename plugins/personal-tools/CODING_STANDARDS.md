@@ -45,6 +45,7 @@ The type system is a proof assistant. An assertion (`as T`, non-null `!`) is an 
 - **Narrow by construction.** Use discriminated unions with literal tags, type predicates, refinement, and `in`/equality narrowing. Where a lookup table must cover a key space, type it as an exhaustive `Record` over that key space so omission is a compile error; where a union must be handled totally, close every `switch` with a `never`-typed exhaustiveness check so extension is a compile error.
 - **Make illegal states unrepresentable.** Model mutually exclusive configurations as union variants, not as co-occurring optionals whose consistency is maintained by convention. Optionality and nullability are semantic claims — `undefined` for "not part of this payload", `null` for "known to be absent" — choose deliberately and keep the distinction stable across a contract.
 - **Copied constants that mirror persisted values are contracts.** When a context locally re-declares wire literals, the declaration carries a note binding it to the storage format, and equality is verified in review. This is the one place duplication demands vigilance rather than celebration.
+- **Every representable state is a reachable state.** Narrow a type until it admits only the states the design permits; then handle each state it still admits as if execution can arrive there. Where the language cannot express that a path is impossible, its arm returns a typed error carrying the true facts of that state.
 
 ## 6. Effects at the edges
 
