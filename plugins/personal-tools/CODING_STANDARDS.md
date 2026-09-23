@@ -72,11 +72,18 @@ A comment is a liability with a maintenance cost and a decay rate. It exists onl
 - **When justified, comments are minimal** — one or two lines, adjacent to the constraint they record. A magic number is first replaced by a named constant derived in code; only a residual, truly extrinsic relationship earns a comment.
 - **Markup comments in templates are effectively never justified.** Structure and naming must carry the template's meaning.
 
-## 9. Change discipline
+## 9. Tests: falsifiable specifications
+
+A test is an executable claim about behavior, worth exactly the defects it can reveal.
+
+- **Adequacy is measured against the specification, not the structure.** Every rule the specification imposes, at its boundary values, is pinned by a test named for it that kills a first-order mutant violating that rule alone; a specified interaction between rules is itself a rule.
+- **Every test pins specified behavior no other test pins.** A test subsumed by the rest of the suite is maintenance cost without evidence and is deleted; the suite is minimal, not merely adequate.
+
+## 10. Change discipline
 
 - **Every commit is an independently valid state.** Each commit builds, typechecks, lints, and passes its tests in isolation, with its dependency manifests, lockfiles, and export maps consistent at that revision. A stacked series is a sequence of such states, each reviewable as a coherent unit with a single intent.
 
-## 10. The review posture
+## 11. The review posture
 
 Before finalizing, interrogate the diff as its most hostile reviewer:
 
