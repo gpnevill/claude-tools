@@ -1,6 +1,6 @@
 ---
 name: resolve-pr-comments
-description: Triage and apply the review comments of a Bitbucket pull request given its PR id or URL. Checks out the PR's source branch (failing if local and remote are out of sync), itemizes the comments that call for changes, asks the user per comment whether the change is justified (yes / no / agent decides — auto or with confirmation), neutrally investigates the "agent decides" ones, applies all valid changes, commits and pushes them, then resolves the actioned threads and replies on the rest. Use when the user says "resolve the comments on PR 1234", "handle the review feedback on that PR", or invokes /resolve-pr-comments <id or URL>.
+description: Triage and apply the review comments of a Bitbucket pull request given its PR id or URL. Checks out the PR's source branch (failing if local and remote are out of sync), itemizes the comments that call for changes, asks the user per comment whether the change is justified (yes / no / agent decides — auto or with confirmation), neutrally investigates the "agent decides" ones, applies all valid changes, commits and pushes them, then replies on the threads and resolves the actioned ones. Use when the user says "resolve the comments on PR 1234", "handle the review feedback on that PR", or invokes /resolve-pr-comments <id or URL>.
 argument-hint: <pr-id or bitbucket PR URL>
 ---
 
@@ -101,7 +101,7 @@ Then `git push origin <branch>`. Two ways this fails, handled differently:
 
 Per item, keyed by its thread's root comment id:
 
-- **Actioned in full** → resolve the thread: `bb_post` `/repositories/{workspace}/{repo}/pullrequests/{id}/comments/{root id}/resolve`, no reply.
+- **Actioned in full** → reply "Done" or similar, resolve the thread: `bb_post` `/repositories/{workspace}/{repo}/pullrequests/{id}/comments/{root id}/resolve`.
 - **Not actioned** → reply explaining why, and leave the thread open.
 - **Actioned in part** → reply stating what was actioned, what was not, and why, and leave the thread open.
 
@@ -109,7 +109,7 @@ The explanation is the ruling's justification, or the user's reason. Where the u
 
 A reply is `bb_post` `/repositories/{workspace}/{repo}/pullrequests/{id}/comments` with body `{"content": {"raw": "<text>"}, "parent": {"id": <root id>}}`. After every write, re-read the thread and confirm it landed — a reply that is not under its thread, or a thread that did not resolve, is a failure to report, not to silently accept.
 
-Replies must be **minimally concise**. Where replying to a person — anything not obviously an automation or app account — be polite and epistemically humble: frame things collaboratively and open-endedly, and ask for their thoughts where that is justified. That is not deference: do not close with "happy to do it your way though" or any other hedge.
+Replies must be **minimally concise**. Where replying to a person — anything not obviously an automation or app account — be polite and epistemically humble: frame things collaboratively and open-endedly, and ask for their thoughts where that is justified. Present decisions as opinions with justification, not assertions. Communicate collaboration and response-invitation through phrasing and structure of the main text, instead of ending replies with standalone questions such as "happy to do your way" or "what do you think". Minimal conciseness should not drop any explanation or justification.
 
 ## Step 12 — Final report
 
