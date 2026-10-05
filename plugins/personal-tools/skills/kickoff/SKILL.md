@@ -1,12 +1,12 @@
 ---
 name: kickoff
-description: Kick off a semicolon-separated list of tickets and/or described pieces of work at once - per item, set up a Herdr worktree and start a Claude Code session in it, in plan mode, running /deliver on that item. Use when the user says "kick off M2X-1234; M2X-1235", "start these in their own worktrees", or invokes /kickoff.
+description: Kick off a semicolon-separated list of tickets and/or described pieces of work at once - per item, set up a Herdr worktree and start a Claude Code session in it, in auto mode, running /deliver on that item. Use when the user says "kick off M2X-1234; M2X-1235", "start these in their own worktrees", or invokes /kickoff.
 argument-hint: '<ticket-key and/or work description>; <ticket-key and/or work description>; …'
 ---
 
 # Kickoff
 
-Fan a list of work items out into one Herdr worktree per item, each with its own Claude Code session in plan mode already running `/deliver` on that item. This skill sets the worktrees up and starts those sessions; it never follows them.
+Fan a list of work items out into one Herdr worktree per item, each with its own Claude Code session already running `/deliver` on that item. This skill sets the worktrees up and starts those sessions; it never follows them.
 
 ## Non-negotiable mechanics
 
@@ -58,10 +58,10 @@ Herdr agent names match `[a-z][a-z0-9_-]{0,31}` and must be unique among live ag
 ### 3.4 Start Claude Code
 
 ```bash
-herdr agent start <name> --kind claude --pane <pane id> --timeout 120000 -- --permission-mode plan
+herdr agent start <name> --kind claude --pane <pane id> --timeout 120000 -- --permission-mode auto
 ```
 
-The session starts in plan mode, so it reaches the user for approval before it writes anything. Arguments after `--` are Claude Code's own; everything before it is Herdr's. The startup allowance is raised over the 30-second default because a repository whose session hooks and configuration are slow to load would otherwise fail an item whose worktree already exists.
+Arguments after `--` are Claude Code's own; everything before it is Herdr's. The startup allowance is raised over the 30-second default because a repository whose session hooks and configuration are slow to load would otherwise fail an item whose worktree already exists.
 
 A non-zero exit says nothing about why. Read the pane before concluding anything:
 
@@ -93,4 +93,4 @@ Never pass `--wait`: `/deliver` runs for as long as the work takes and puts ques
 
 One row per item: the item text, worktree path, branch, Herdr workspace label, agent name, and that the `/deliver` prompt was submitted — or, for an item that did not get that far, the step that stopped it and why.
 
-Close by saying that each session is running in plan mode and will ask for approval there before it writes anything, that some are likely already waiting on the user, and that this session has not moved.
+Close by saying that each session is running in auto mode and that this session has not moved.
