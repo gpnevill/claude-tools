@@ -101,7 +101,7 @@ Then `git push origin <branch>`. Two ways this fails, handled differently:
 
 Per item, keyed by its thread's root comment id:
 
-- **Actioned in full** → reply "Done" or similar, resolve the thread: `bb_post` `/repositories/{workspace}/{repo}/pullrequests/{id}/comments/{root id}/resolve`.
+- **Actioned in full** → reply "Done" or a minimally short explanation of how the comment was resolved if not trivial from the comment itself, then resolve the thread: `bb_post` `/repositories/{workspace}/{repo}/pullrequests/{id}/comments/{root id}/resolve`.
 - **Not actioned** → reply explaining why, and leave the thread open.
 - **Actioned in part** → reply stating what was actioned, what was not, and why, and leave the thread open.
 
