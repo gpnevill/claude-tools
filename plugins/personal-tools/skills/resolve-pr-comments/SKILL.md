@@ -58,7 +58,7 @@ If there are no change-requesting comments, report that and end the skill succes
 
 ## Step 6 — Ask the user about every item
 
-For every single item, ask the user whether the comment is justified and the change necessary. Use the AskUserQuestion tool, batching up to 4 items per call until all items have been asked. One question per item: header like "Comment 3", question text restating the comment and its location. The options, exactly and in this order, with none marked as recommended:
+For every single item, ask the user whether the comment is justified and the change necessary. Use the AskUserQuestion tool, batching up to 4 items per call until all items have been asked. One question per item: header like "Comment 3", author of the comment, question text restating the comment and its location. The options, exactly and in this order, with none marked as recommended:
 
 1. **Agent decides (confirmation)** — you investigate and rule, then put the ruling back to the user before acting on it
 2. **Agent decides (auto)** — you investigate, rule on its validity yourself, and act on your ruling.
