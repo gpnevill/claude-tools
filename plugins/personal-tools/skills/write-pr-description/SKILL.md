@@ -49,6 +49,12 @@ If the derived branch differs from the PR's base, warn the user via AskUserQuest
    - **Base** = `origin/<base>` from Step 2. Whatever base-resolution rule the command's own text contains is superseded; do not apply it.
 4. Any failure the command's text defines → report its error and end without modifying the PR.
 
+### Step 5.1 — Quality standards
+
+5. The PR description must be scoped to the responsibility of a PR description. It must solely provide notice about the changes in the diff and be informative for a reviewer. The PR description should not state ticket numbers or information about how the work was performed. There must be no discussion about iterations that the work went through to get to its current state, nor discussion of additional tickets or PRs that are related. Any processes that must be run alongside or after release — e.g. migrations or staged deployments — are a concern of the ticket and must be noted as a comment in the ticket, not in the PR description.
+5. Keep any "Testing" section of the PR description limited to a minimal statement that either the changes have or have not been tested in a test environment. If they have not, note in bold that this must be resolved before merging — not necessarily that the changes do need to be tested in a test environment, just that the statement that they have not been tested in a test environment needs to be manually resolved. Do not include anything about unit tests, build pipelines, or anything else in the "Testing" section that is obvious from the PR itself (i.e. a user can see the unit tests in the diff, they can see the green CI pipelines).
+6. Never include any trailers, e.g. "Generated with Claude Code" or similar.
+
 ## Step 6 — Ask the user for what the diff cannot tell you
 
 From the files read in Step 5 — as they exist right now — list every piece of content the final description requires that is **not obtainable from the diff, the commits, or the repository state**. What qualifies is determined entirely by that fresh read; do not rely on a remembered or assumed list of sections or questions. Whether and how the changes were verified is the classic example of such content, but only the current files define the actual set.
