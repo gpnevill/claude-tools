@@ -40,7 +40,7 @@ List every architectural change, refactoring, or unattributed file whose justifi
 Load the `artifact-design` skill before writing, and `artifact-diagramming` before drawing. Content, in this order:
 
 1. **Title and read time** — the title starts with the ticket key, when the work has one; the estimate on the first line below the title.
-2. **Solution** — the design journey: the shape of the solution; then each architectural change and why it is required. Diagrams where illustrative and valuable. A contract's signature appears where the contract itself is changed.
+2. **Solution** — the design journey: the problem; the shape of the solution and how it resolves the problem; then each architectural change and why it is required. Diagrams where illustrative and valuable. A contract's signature appears where the contract itself is changed.
 3. **Key architectural decisions** — a table: decision, options, chosen, why.
 4. **Refactoring** — where, purpose, justification, per item. None → one sentence saying so.
 5. **Change distribution** — a table of changed lines per class from Step 3: tests, generated, refactoring, each area.
