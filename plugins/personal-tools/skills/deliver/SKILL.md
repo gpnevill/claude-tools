@@ -85,12 +85,21 @@ Invoke `/ship-to-test` with the branch name as its argument. Its outcome is its 
 
 ## Phase 8 — PR
 
-1. Invoke `/push-feat-or-fix-branch` (current branch). Capture the PR id from its report.
-2. Invoke `/write-pr-description <PR id>`.
+1. Push the branch: `git push -u origin <branch>`; diverged from origin → `--force-with-lease`, never plain `--force`. Unable to push → give the user the command to run as `! git push …`, and wait.
+2. Ask via `AskUserQuestion`: who reviews the PR? Options: a recommended reviewer, labelled `(Recommended)`, and **None**; anyone else via the built-in Other.
+3. Look for an open or draft PR from the branch: `bb_get` `/repositories/<ws>/<repo>/pullrequests` with `q` `source.branch.name="<branch>" AND (state="OPEN" OR state="DRAFT")`, `<ws>/<repo>` parsed from `git remote get-url origin`.
+   - Found, reviewers matching the chosen set → nothing to do.
+   - Found, reviewers differing → ask via `AskUserQuestion` how to proceed. Options: **Keep the PR's reviewers** and **Set the chosen reviewers** (`bb_put` the PR with its title unchanged and the chosen reviewers); anything else via the built-in Other, acted on as the user directs.
+   - None → invoke `/create-pr <branch> <base> <reviewers>`. Capture the PR id from its report.
+4. Invoke `/write-pr-description <PR id>`.
 
 ## Phase 9 — Tickets to review
 
-Ask via `AskUserQuestion`: move any tickets to review? Options: the original ticket key (when one exists) and **None**; other ticket(s) via the built-in Other. For each chosen ticket, invoke `/move-ticket-to-review <ticket>`.
+1. Ask via `AskUserQuestion`: move any tickets to review? Options: the original ticket key (when one exists) and **None**; other ticket(s) via the built-in Other. **None** → Final report.
+2. Judge from `git diff --name-only origin/<base>...<branch>` whether any change reaches the frontend — application code, client-reachable package code, hosting assets, as opposed to server-side services, infrastructure, or docs. Unsure → ask via `AskUserQuestion`. None → step 5.
+3. Ask via `AskUserQuestion`: produce hosting previews on the chosen ticket(s)? Options: **Yes** and **No**. **No** → step 5.
+4. Invoke `/produce-hosting-previews <branch>`. Its failure is its own; reported, then step 5 with nothing written. Otherwise set each chosen ticket's fields — names verbatim — **AU TEST link**, **NZ TEST link**, **US TEST link** to the reported test-au, test-nz, test-us URLs, replacing any existing values: field ids from the issue's edit metadata (`getJiraIssueTypeMetaWithFields` or equivalent), then `editJiraIssue`; API unable → set them via claude-in-chrome on the issue page. Re-read each issue to verify all three landed.
+5. For each chosen ticket, invoke `/move-ticket-to-review <ticket>`.
 
 ## Final report
 
