@@ -1,6 +1,6 @@
 ---
 name: write-solution-design
-description: Produce a solution design artifact from the current working session - the solution and its architectural changes, why it is designed that way, the decisions that shaped it, the refactoring it carries, and where the line changes fall - published as a page a reviewer reads in under five minutes before the code. Fails in a session without the working to draw it from. Use when the user says "write up the solution design", "produce the design artifact for this work", or invokes /write-solution-design.
+description: Produce a solution design artifact from the current working session - the solution and its architectural changes, why it is designed that way, the decisions that shaped it, the refactoring it carries, and where the line changes fall - published as a page a reviewer reads in under ten minutes before the code. Fails in a session without the working to draw it from. Use when the user says "write up the solution design", "produce the design artifact for this work", or invokes /write-solution-design.
 ---
 
 # Write solution design
@@ -39,7 +39,7 @@ List every architectural change, refactoring, or unattributed file whose justifi
 
 Load the `artifact-design` skill before writing, and `artifact-diagramming` before drawing. Content, in this order:
 
-1. **Title and read time** — the estimate on the first line below the title.
+1. **Title and read time** — the title starts with the ticket key, when the work has one; the estimate on the first line below the title.
 2. **Solution** — the design journey: the shape of the solution; the constraints that bound it; then each architectural change and why it is required. Diagrams where illustrative and valuable. A contract's signature appears where the contract itself is changed.
 3. **Key architectural decisions** — a table: decision, options, chosen, why.
 4. **Refactoring** — where, purpose, justification, per item. None → one sentence saying so.
@@ -49,7 +49,8 @@ Rules:
 
 - The journey is the reasoning path from problem to solution, never the chronology of the session: no narration of attempts, iterations, reviews, or process. Alternatives live in the decisions table.
 - Technical, professional prose in the codebase's own vocabulary. No trailers.
-- **Read time**: 200 words per minute over every word the reader sees, tables included, plus half a minute per diagram, rounded up to the half minute. The budget is five minutes — roughly 800 words alongside two diagrams. Over → cut until under. The estimate is recomputed from the final text, never guessed.
+- The artifact must be easy to read and easily digestible.
+- **Read time**: 200 words per minute over every word the reader sees, tables included, plus half a minute per diagram, rounded up to the half minute. The budget is ten minutes — roughly 1800 words alongside two diagrams. Over → cut until under. The estimate is recomputed from the final text, never guessed.
 
 Acceptance test: a reviewer who reads only this page can state what the solution is, why each major change exists, and which part of the diff each section accounts for.
 
