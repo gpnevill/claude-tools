@@ -14,7 +14,7 @@ The artifact draws on exactly two sources: the change set, and the design record
 Both must hold:
 
 - **A change set.** The solution exists as code: commits on the working branch beyond its base, and/or uncommitted changes in the working tree.
-- **A design record.** This session holds why the solution took its shape — decisions made, alternatives weighed, constraints discovered — in the conversation, or in plan and iteration files the session wrote or read.
+- **A design record.** This session holds why the solution took its shape — decisions made, alternatives weighed — in the conversation, or in plan and iteration files the session wrote or read.
 
 Either missing → fail: `write-solution-design requires a working session with a change set and the reasoning behind it; this session has no <change set | design record>.` A fresh session on a branch with commits fails on the second; a planning session that produced no code fails on the first.
 
@@ -22,7 +22,7 @@ Either missing → fail: `write-solution-design requires a working session with 
 
 1. **Base ref**: from the session — plan frontmatter `base`, a delivery run's confirmed base, or what the user stated. Unknown → ask via `AskUserQuestion`, the branch's likeliest base first.
 2. **Change set**: `git fetch origin <base>`, then `git diff origin/<base>...HEAD` plus the working tree — `git diff HEAD` and untracked files. `git diff --numstat` over the same set for Step 3.
-3. **Design record**: re-read every plan and iteration file in the session's work dir, if one exists, **now, in full**, even if read earlier; the conversation supplies the rest. Decisions, alternatives and constraints are taken as recorded, not as remembered.
+3. **Design record**: re-read every plan and iteration file in the session's work dir, if one exists, **now, in full**, even if read earlier; the conversation supplies the rest. Decisions and alternatives are taken as recorded, not as remembered.
 
 ## Step 3 — Analyse
 
@@ -40,7 +40,7 @@ List every architectural change, refactoring, or unattributed file whose justifi
 Load the `artifact-design` skill before writing, and `artifact-diagramming` before drawing. Content, in this order:
 
 1. **Title and read time** — the title starts with the ticket key, when the work has one; the estimate on the first line below the title.
-2. **Solution** — the design journey: the shape of the solution; the constraints that bound it; then each architectural change and why it is required. Diagrams where illustrative and valuable. A contract's signature appears where the contract itself is changed.
+2. **Solution** — the design journey: the shape of the solution; then each architectural change and why it is required. Diagrams where illustrative and valuable. A contract's signature appears where the contract itself is changed.
 3. **Key architectural decisions** — a table: decision, options, chosen, why.
 4. **Refactoring** — where, purpose, justification, per item. None → one sentence saying so.
 5. **Change distribution** — a table of changed lines per class from Step 3: tests, generated, refactoring, each area.
