@@ -1,6 +1,6 @@
 ---
 name: deliver
-description: Orchestrate the full delivery lifecycle for a ticket or described piece of work - verify the working environment, exhaustive interrogation-based planning, implementation, review, UI testing, iteration loops, ship to test, PR with description, and moving tickets to review. Use when the user says "deliver M2X-1234", "run the full pipeline on this", or invokes /deliver.
+description: Orchestrate the full delivery lifecycle for a ticket or described piece of work - verify the working environment, exhaustive interrogation-based planning, implementation, review, UI testing, iteration loops, solution design, ship to test, PR with description, and moving tickets to review. Use when the user says "deliver M2X-1234", "run the full pipeline on this", or invokes /deliver.
 argument-hint: '<ticket-key and/or work description>'
 ---
 
@@ -75,25 +75,32 @@ Each round:
 
 Stage and commit all work in the worktree with conventional-commit message(s); behavioral changes carry the ticket key (`feat: [M2X-1234] …`).
 
-## Phase 6 — User confirmation
+## Phase 6 — Reviewers and solution design
+
+1. Ask via `AskUserQuestion`: who reviews the PR? Options: a recommended reviewer, labelled `(Recommended)`, and **None**; anyone else via the built-in Other.
+2. Ask via `AskUserQuestion`: produce a solution design for the work? Options: **Yes** and **No**. **No** → Phase 7.
+3. Invoke `/write-solution-design`. Its failure is its own; reported, then Phase 7. Otherwise write out the artifact URL and tell the user to make the artifact shareable — organization-wide, with commenting.
+4. Ask via `AskUserQuestion`: has the artifact been made shareable? Options: **Yes**; anything else via the built-in Other, acted on as the user directs, then this step repeats.
+5. Comment on the original ticket (when one exists) via `addCommentToJiraIssue`: the artifact URL, that the solution design is ready for technical review, and a mention of each chosen reviewer (`[~accountid:<id>]`, ids via `lookupJiraAccountId`) when any were chosen. Re-read the issue; a comment or mention that did not land is reported loudly and awaits user direction.
+
+## Phase 7 — User confirmation
 
 Ask via `AskUserQuestion` whether to continue to shipping. Options: **Continue**; feedback or changes via the built-in Other. Anything other than continue is acted on as the user directs, then this phase repeats.
 
-## Phase 7 — Ship to test
+## Phase 8 — Ship to test
 
 Invoke `/ship-to-test` with the branch name as its argument. Its outcome is its own; a failure there is reported and ends the run as that skill defines.
 
-## Phase 8 — PR
+## Phase 9 — PR
 
 1. Push the branch: `git push -u origin <branch>`; diverged from origin → `--force-with-lease`, never plain `--force`. Unable to push → give the user the command to run as `! git push …`, and wait.
-2. Ask via `AskUserQuestion`: who reviews the PR? Options: a recommended reviewer, labelled `(Recommended)`, and **None**; anyone else via the built-in Other.
-3. Look for an open or draft PR from the branch: `bb_get` `/repositories/<ws>/<repo>/pullrequests` with `q` `source.branch.name="<branch>" AND (state="OPEN" OR state="DRAFT")`, `<ws>/<repo>` parsed from `git remote get-url origin`.
-   - Found, reviewers matching the chosen set → nothing to do.
+2. Look for an open or draft PR from the branch: `bb_get` `/repositories/<ws>/<repo>/pullrequests` with `q` `source.branch.name="<branch>" AND (state="OPEN" OR state="DRAFT")`, `<ws>/<repo>` parsed from `git remote get-url origin`.
+   - Found, reviewers matching the set chosen in Phase 6 → nothing to do.
    - Found, reviewers differing → ask via `AskUserQuestion` how to proceed. Options: **Keep the PR's reviewers** and **Set the chosen reviewers** (`bb_put` the PR with its title unchanged and the chosen reviewers); anything else via the built-in Other, acted on as the user directs.
    - None → invoke `/create-pr <branch> <base> <reviewers>`. Capture the PR id from its report.
-4. Invoke `/write-pr-description <PR id>`.
+3. Invoke `/write-pr-description <PR id>`.
 
-## Phase 9 — Tickets to review
+## Phase 10 — Tickets to review
 
 1. Ask via `AskUserQuestion`: move any tickets to review? Options: the original ticket key (when one exists) and **None**; other ticket(s) via the built-in Other. **None** → Final report.
 2. Judge from `git diff --name-only origin/<base>...<branch>` whether any change reaches the frontend — application code, client-reachable package code, hosting assets, as opposed to server-side services, infrastructure, or docs. Unsure → ask via `AskUserQuestion`. None → step 5.
@@ -103,4 +110,4 @@ Invoke `/ship-to-test` with the branch name as its argument. Its outcome is its 
 
 ## Final report
 
-Branch, worktree, PR URL, shipped-to-test outcome, hosting preview URLs if produced, tickets moved to review, and the work-dir path holding the full plan and report trail.
+Branch, worktree, PR URL, shipped-to-test outcome, solution design URL if produced, hosting preview URLs if produced, tickets moved to review, and the work-dir path holding the full plan and report trail.
