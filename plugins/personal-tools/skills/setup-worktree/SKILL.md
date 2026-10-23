@@ -51,7 +51,7 @@ Then fetch what the next step needs — `git fetch origin <branch>` for a branch
 herdr worktree create --cwd "$PWD" --branch <branch> --base origin/<base> --label <branch without its type prefix> --no-focus
 ```
 
-`--base` is passed only when the branch is being cut; adopting one omits it. The label is the branch stripped of its leading `<type>/` segment, so `fix/M2X-23659-location-instruction-staleness` labels its workspace `M2X-23659-location-instruction-staleness`. `--path` is omitted so Herdr places the checkout; `--no-focus` leaves this session focused where it is.
+`--base` is `origin/<base>` for a branch being cut and `origin/<branch>` for one adopted from the remote alone. A branch that already exists locally omits it. The label is the branch stripped of its leading `<type>/` segment, so `fix/M2X-23659-location-instruction-staleness` labels its workspace `M2X-23659-location-instruction-staleness`. `--path` is omitted so Herdr places the checkout; `--no-focus` leaves this session focused where it is.
 
 Success prints one JSON line: the checkout is `.result.worktree.path`, the workspace `.result.workspace.label` (`.result.worktree.label` is the repository's name, not the label passed in). A non-zero exit, or a response without that path, is a stop — report the CLI's stderr verbatim. Never fall back to `git worktree add`: Herdr manages the worktrees, and one created behind its back has no workspace.
 
