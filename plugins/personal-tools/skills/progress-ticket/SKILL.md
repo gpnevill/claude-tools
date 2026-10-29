@@ -45,11 +45,9 @@ Every ticket without an entry gets one:
 
 Timestamps come from `date -Iseconds`.
 
-## Step 3 — Gather what is shared, and choose the tickets
+## Step 3 — Gather what is shared
 
 My own account identity, from the Atlassian server's current-user tool — the tree's `when` tests are written in the first person and cannot be evaluated without it — and `herdr worktree list --cwd "$PWD"`, re-read in 4.6 where an offloaded action needs a current one. Both hold for every ticket and are read once.
-
-Then one `AskUserQuestion` question per ticket, batched up to four questions per call, offering **Progress** and **Skip**. A skipped ticket is logged as skipped and takes no further part in the run.
 
 ## Step 4 — Per ticket, in order
 
@@ -63,11 +61,11 @@ Walk the tree from the top, evaluating **every** state's `when` at each level an
 
 Log each active state as a `/`-joined path of ids — `assigned-to-me / ready-to-work`, or `(root)` where no top-level state held — **every time it is derived**. A `when` may test what earlier runs derived.
 
-Straight to 4.8 only where every active state carries `closes_workflow: true`; one live state alongside means the workflow is not over, and the closing one contributes nothing. Otherwise, follow the `instruction` of every active state that has one.
+Straight to 4.7 only where every active state carries `closes_workflow: true`; one live state alongside means the workflow is not over, and the closing one contributes nothing. Otherwise, follow the `instruction` of every active state that has one.
 
 ### 4.3 Collect the applicable actions
 
-The file's top-level `actions` first, then every active state's, in the order the tree declares them — a state active on two branches contributes its actions once. Drop any whose `when` does not hold. None left → log the derivation and go to 4.7.
+The file's top-level `actions` first, then every active state's, in the order the tree declares them — a state active on two branches contributes its actions once. Drop any whose `when` does not hold. None left → log the derivation and move on.
 
 ### 4.4 Run them, in order
 
@@ -78,7 +76,7 @@ Four passes, each of them top-level down:
 3. Ask about the rest — one `AskUserQuestion` question per action, batched up to four questions per call, each offering **Yes**, **No** and **Skip**, with anything else via the built-in Other. **No** and **Skip** are logged as a decision taken against the action, where a later `when` can see it.
 4. Every action answered yes.
 
-An action's `synchronous` field decides how it is carried out, in every pass alike — `true` in this session (4.5), `false` in a session of its own (4.6). A second progression from 4.7 runs these passes exactly as written, save that every action counts as `auto_start: false` — nothing repeats itself unasked.
+An action's `synchronous` field decides how it is carried out, in every pass alike — `true` in this session (4.5), `false` in a session of its own (4.6).
 
 ### 4.5 Carrying out a synchronous action
 
@@ -116,11 +114,7 @@ The action's `prompt` is used **verbatim** when it has one; otherwise write a br
 
 Quote the whole prompt as one single-quoted argument, escaping any embedded single quote. Never pass `--wait`. Log the action started, with its workspace, tab and agent.
 
-### 4.7 Progress again, or done
-
-Every applicable action having been run, ask **Progress again** or **Done with this ticket**. Progress again → back to 4.2, deriving afresh, since what has just run may have moved the ticket. A derivation that leaves nothing to run says so and moves on.
-
-### 4.8 Close out
+### 4.7 Close out
 
 Every active state carrying `closes_workflow: true` ends the ticket's workflow and offers nothing else. Show what would be lost first:
 
@@ -133,4 +127,4 @@ Ask via `AskUserQuestion` to close out or leave it open, with that summary in th
 
 ## Step 5 — Report
 
-Open with the repository this run was scoped to. Then per ticket: the derived states, what was run or offloaded, the workspace, tab and agent of anything offloaded, and the log lines written — or that it was skipped, or the step that stopped it and why. Close by naming the sessions now running.
+Open with the repository this run was scoped to. Then per ticket: the derived states, what was run or offloaded, the workspace, tab and agent of anything offloaded, and the log lines written — or the step that stopped it and why. Close by naming the sessions now running.
