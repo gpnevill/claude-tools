@@ -1,63 +1,54 @@
 ---
 name: write-solution-design
-description: Produce a solution design artifact from the current working session - the solution and its architectural changes, why it is designed that way, the decisions that shaped it, the refactoring it carries, and where the line changes fall - published as a page a reviewer reads in under six minutes before the code. Fails in a session without the working to draw it from. Use when the user says "write up the solution design", "produce the design artifact for this work", or invokes /write-solution-design.
+description: Produce a solution design artifact from the current working session - the solution, its architectural changes, key decisions, refactoring, and change distribution - for a reviewer to read before the code in at most six minutes. Fails in a session without a change set and the reasoning behind it. Use when the user says "write up the solution design", "produce the design artifact for this work", or invokes /write-solution-design.
 ---
 
 # Write solution design
 
-Publish a page that takes a reviewer through the design of this session's work before they open the diff: what the solution is, why it is designed the way it is, and the justification for every change in it. The outcome is binary: either the artifact is published and its link reported, or the skill fails and publishes nothing.
+Publish an artifact that presents the design of this session's work to a reviewer ahead of the diff: the solution, the reasons for its design, and the justification for each change. It has exactly two sources: the change set, and the design record held by the session. Nothing in it is inferred from the diff alone.
 
-The artifact draws on exactly two sources: the change set, and the design record this session holds. Nothing in it may be inferred from the diff alone — reasoning the session never established is fabricated reasoning. This skill runs in the main conversation; the session is its material and cannot be handed to a subagent.
+## Step 1 — Check the session
 
-## Step 1 — Sufficiency gate
+Both are required:
 
-Both must hold:
+- **Change set**: commits on the working branch that are not on its base, or uncommitted changes in the working tree.
+- **Design record**: the reasons for the solution's design — decisions made and alternatives considered — in the conversation, or in plan and iteration files the session wrote or read.
 
-- **A change set.** The solution exists as code: commits on the working branch beyond its base, and/or uncommitted changes in the working tree.
-- **A design record.** This session holds why the solution took its shape — decisions made, alternatives weighed — in the conversation, or in plan and iteration files the session wrote or read.
-
-Either missing → fail: `write-solution-design requires a working session with a change set and the reasoning behind it; this session has no <change set | design record>.` A fresh session on a branch with commits fails on the second; a planning session that produced no code fails on the first.
+Either missing → publish nothing and stop with: `write-solution-design requires a working session with a change set and the reasoning behind it; this session has no <change set | design record>.`
 
 ## Step 2 — Gather the material
 
-1. **Base ref**: from the session — plan frontmatter `base`, a delivery run's confirmed base, or what the user stated. Unknown → ask via `AskUserQuestion`, the branch's likeliest base first.
-2. **Change set**: `git fetch origin <base>`, then `git diff origin/<base>...HEAD` plus the working tree — `git diff HEAD` and untracked files. `git diff --numstat` over the same set for Step 3.
-3. **Design record**: re-read every plan and iteration file in the session's work dir, if one exists, **now, in full**, even if read earlier; the conversation supplies the rest. Decisions and alternatives are taken as recorded, not as remembered.
+1. **Base ref**: taken from the session — plan frontmatter `base`, the base confirmed by a delivery run, or the base stated by the user. Unknown → ask the user.
+2. **Change set**: the changes on the branch since its merge base with `origin/<base>`, plus uncommitted changes and untracked files, with added and removed line counts per file.
+3. **Design record**: the conversation, plus every plan and iteration file in the session's work dir, where one exists, re-read in full.
 
 ## Step 3 — Analyse
 
-- **Architectural changes.** Every contract or interface added or changed; every boundary created, moved, or crossed differently — ports, adapters, events, API and schema changes, data-model changes. For each: what it is, and why the solution cannot be fulfilled without it, as the record states.
-- **Key decisions.** Keep a decision only if choosing otherwise would have shaped the solution differently; drop naming, file layout, formatting and ordering. For each: the question, the options considered, the choice, the reason.
-- **Refactoring.** Behaviour-preserving changes to code that existed before the work. For each: where, what it enables for the solution, and why it is justified — what the solution would cost without it.
-- **Distribution.** Classify each file in the numstat as tests, generated, refactoring, or one of the areas the architectural analysis names; sum the changed lines (added plus removed) per class; round to a rough figure.
+- **Architectural changes**: every contract or interface added or changed, and every boundary created, moved, or crossed differently — ports, adapters, events, and API, schema and data-model changes. For each: what it is, and why the solution requires it.
+- **Key decisions**: decisions for which a different choice would have changed the solution's design. A decision must be materially significant and justify its inclusion in the table. For each: the question, the options considered, the choice, and the reason.
+- **Refactoring**: behaviour-preserving changes to code that predates the work. For each: its location, what it enables, and the cost to the solution of omitting it.
+- **Distribution**: each changed file is classified as tests, generated, refactoring, or one of the areas named by the architectural changes. Changed lines (added plus removed) are summed per class and given as rounded figures.
 
-## Step 4 — Ask for what the session does not hold
+## Step 4 — Ask for missing justification
 
-List every architectural change, refactoring, or unattributed file whose justification the record lacks. None → skip this step. Otherwise ask for all of it in one batched `AskUserQuestion` call, naming each change concretely and offering the likely reasons as options. Answers go in as the user gives them; whatever the user declines is stated in the artifact as having no established justification — never guessed.
+Ask the user to justify every architectural change, refactoring, or unclassified file that the design record does not justify. Answers are used as given. A change the user declines to justify is stated in the artifact as having no established justification.
 
 ## Step 5 — Write the artifact
 
-Load the `artifact-design` skill before writing, and `artifact-diagramming` before drawing. Content, in this order:
+Use the built-in artifact skills where they exist. Sections, in order:
 
-1. **Title and read time** — the title starts with the ticket key, when the work has one; the estimate on the first line below the title.
-2. **Solution** — the design journey: the problem; the shape of the solution and how it resolves the problem; then each architectural change and why it is required. Diagrams where illustrative and valuable. A contract's signature appears where the contract itself is changed.
+1. **Title and read time** — the title begins with the ticket key, where the work has one. The read-time estimate is on the line below the title.
+2. **Solution** — the problem; the solution in outline and how it resolves the problem; then each architectural change and why it is required. Diagrams are included where they aid understanding. A contract's signature is shown where the contract itself is changed.
 3. **Key architectural decisions** — a table: decision, options, chosen, why.
-4. **Refactoring** — where, purpose, justification, per item. None → one sentence saying so.
-5. **Change distribution** — a table of changed lines per class from Step 3: tests, generated, refactoring, each area.
+4. **Refactoring** — where, purpose, justification, per item. None → one sentence stating so.
+5. **Change distribution** — a table of changed lines per class: tests, generated, refactoring, each area.
 
-Rules:
+Requirements:
 
-- The journey is the reasoning path from problem to solution, never the chronology of the session: no narration of attempts, iterations, reviews, or process. Alternatives live in the decisions table.
-- Technical, professional prose in the codebase's own vocabulary. No trailers.
-- The artifact must be easy to read and easily digestible.
-- **Read time**: 200 words per minute over every word the reader sees, tables included, plus half a minute per diagram, rounded up to the half minute. The budget is six minutes — roughly 1000 words alongside two diagrams. Over → cut until under. The estimate is recomputed from the final text, never guessed.
-
-Acceptance test: a reviewer who reads only this page can state what the solution is, why each major change exists, and which part of the diff each section accounts for.
+- **Order**: the Solution section follows the reasoning from problem to solution, not the session's chronology. It excludes attempts, iterations, reviews, and process. Alternatives are presented in the decisions table.
+- **Prose**: technical, professional, easy to read, and in the codebase's vocabulary. Objective and report-like. It is documentation, not literature. Structured for scanning, with no dense blocks of text. No trailers.
+- **Read time**: at most six minutes — approximately 1000 words and two diagrams. Calculated from the final text at 200 words per minute across all visible text, including tables, plus half a minute per diagram, rounded up to the nearest half minute.
 
 ## Step 6 — Publish and report
 
-Write the HTML to `<work dir>/design.html` where the session has a work dir, else the session scratchpad, and publish it with the Artifact tool. Report the artifact URL, the file path, the read time, and every change the artifact states as having no established justification.
-
-## Failure convention
-
-Wherever this skill says fail: emit one clear error explaining what went wrong and stop. Nothing is published on any failure path.
+Write the artifact to the session's work dir, or to the session scratchpad where there is no work dir, and publish it with the Artifact tool. Report the artifact URL, the file path, the read time, and every change stated as having no established justification.
